@@ -108,7 +108,7 @@ def calculate_cophenetic_correlation(connmat):
     return (c,d)
 
 
-def init_pool(matrix, shared_r_arr_, shared_p_arr_, nRows, symmetrical):
+def _init_pool(matrix, shared_r_arr_, shared_p_arr_, nRows, symmetrical):
     global shared_matrix
     shared_matrix = matrix
     global shared_nRows
@@ -121,7 +121,7 @@ def init_pool(matrix, shared_r_arr_, shared_p_arr_, nRows, symmetrical):
     shared_p_arr = shared_p_arr_
 
 
-def f(i):
+def _f(i):
     array_r = np.frombuffer(shared_r_arr.get_obj())
     array_r = array_r.reshape((shared_nRows, shared_nRows))
     array_p = np.frombuffer(shared_p_arr.get_obj())
@@ -174,13 +174,13 @@ def calculatePearsonCorrelationMatrixMultiprocessing(matrix, axis=0, symmetrical
     pool = None
     try:
         pool = mp.Pool(mp.cpu_count(),
-                       initializer=init_pool,
+                       initializer=_init_pool,
                        initargs=(matrix, output_r_arr, output_p_arr,
                                  nRows, symmetrical))
 
         # bar = tqdm(total=nRows*nRows/2)
         # tqdm.write('Calculating Pearson R for each row, multithreaded')
-        for result in tqdm(pool.imap_unordered(f, range(0, nRows)), total=nRows):
+        for result in tqdm(pool.imap_unordered(_f, range(0, nRows)), total=nRows):
             # bar.update(result)
             pass
         # bar.close()
@@ -196,7 +196,7 @@ def calculatePearsonCorrelationMatrixMultiprocessing(matrix, axis=0, symmetrical
         return output_r
 
 
-def calculatePearsonCorrelationMatrix(matrix, axis=0, symmetrical=True, getpvalmat=False):
+def calculatePearsonCorrelationMatrix(matrix, axis=0, symmetrical=True, getpvalmat=False, verbose=False):
 
     if axis == 1:
         matrix = matrix.T
@@ -207,7 +207,8 @@ def calculatePearsonCorrelationMatrix(matrix, axis=0, symmetrical=True, getpvalm
     output_p = np.zeros((nRows, nRows))
 
     bar = tqdm(total=nRows)
-    tqdm.write('Calculating Pearson R for each row')
+    if verbose:
+        tqdm.write('Calculating Pearson R for each row')
     for i in range(0, nRows):
         if symmetrical:
             for j in range(i, nRows):
@@ -223,8 +224,11 @@ def calculatePearsonCorrelationMatrix(matrix, axis=0, symmetrical=True, getpvalm
                 r,p = scipy.stats.pearsonr(rowidata,rowjdata)
                 output_p[i,j] = p
                 output_r[i,j] = r
-        bar.update(1)
-    bar.close()
+        if verbose:
+            bar.update(1)
+
+    if verbose:
+        bar.close()
 
     if getpvalmat:
         return output_r, output_p

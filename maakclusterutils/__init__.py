@@ -1,3 +1,3 @@
 __author__ = 'mac'
 
-from cluster_utils import *
+from cluster_utils import reorder_connectivity, cluster_correlation_matrix,calculate_cophenetic_correlation, UPGMACluster, calculate_connectivity, calculatePearsonCorrelationMatrixMultiprocessing, calculatePearsonCorrelationMatrix, calculateSpearmanRankCorrelationMatrix, calculateDistanceMatrix
