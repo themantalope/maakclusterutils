@@ -206,8 +206,9 @@ def calculatePearsonCorrelationMatrix(matrix, axis=0, symmetrical=True, getpvalm
     output_r = np.zeros((nRows, nRows))
     output_p = np.zeros((nRows, nRows))
 
-    bar = tqdm(total=nRows)
+
     if verbose:
+        bar = tqdm(total=nRows)
         tqdm.write('Calculating Pearson R for each row')
     for i in range(0, nRows):
         if symmetrical:
